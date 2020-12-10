@@ -109,9 +109,8 @@ void setup(void) {
 
   server.on("/light-switch", HTTP_POST, []() {
     String state = server.arg("state");
-    delay(100);
-    digitalWrite(12, HIGH); // SOmente para teste do relé 3.3V
-    analogWrite(12, 255); // SOmente para teste do relé 3.3V
+    delay(100); 
+    
     Serial.println(state);
     
     server.send(200, "text/plain", state);
