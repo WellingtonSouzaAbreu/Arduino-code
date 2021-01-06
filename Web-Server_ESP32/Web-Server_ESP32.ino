@@ -1,0 +1,73 @@
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
+#include <ESPmDNS.h>
+
+const char* ssid = "Dumb";
+const char* password = "pipocadoce";
+
+WebServer server(80);
+
+void handleNotFound() {
+  String message = "File Not Found\n\n";
+  message += "URI: ";
+  message += server.uri();
+  message += "\nMethod: ";
+  message += (server.method() == HTTP_GET) ? "GET" : "POST";
+  message += "\nArguments: ";
+  message += server.args();
+  message += "\n";
+  for (uint8_t i = 0; i < server.args(); i++) {
+    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+  }
+  server.send(404, "text/plain", message);
+}
+
+void setup(void) {
+
+  pinMode(27, OUTPUT);
+
+  Serial.begin(115200);
+  WiFi.mode(WIFI_STA);
+
+  WiFi.begin(ssid, password);
+  Serial.println("");
+
+  // Wait for connection
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.print("Connected to ");
+  Serial.println(ssid);
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  if (MDNS.begin("esp32")) {
+    Serial.println("MDNS responder started");
+  }
+
+  server.on("/", []() {
+    server.send(200, "text/plain", "Aoba, salve salve! Aqui é o esp32!");
+  });
+
+  server.on("/on", HTTP_GET, []() {
+    digitalWrite(27, HIGH);
+    server.send(200, "text/plain", "Led ligado!");
+  });
+
+  server.on("/off", HTTP_GET, []() {
+    digitalWrite(27, LOW);
+    server.send(200, "text/plain", "Led desligado!");
+  });
+
+  server.onNotFound(handleNotFound);
+
+  server.begin();
+  Serial.println("HTTP server started");
+}
+
+void loop(void) {
+  server.handleClient();
+}

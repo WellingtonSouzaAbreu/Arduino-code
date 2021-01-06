@@ -9,13 +9,13 @@ void setup() {
 }
 
 void loop() {
-  if(digitalRead(button) == LOW){
-    tone(speaker,264,100);
-  }else{
+  if (digitalRead(button) == LOW) {
+    tone(speaker, 264, 100);
+  } else {
     //Serial.println("Botão não pressionado");
   }
 
-  tone(7,264,1000);
+  
 
-  delay(1000);
+  delay(10700);
 }

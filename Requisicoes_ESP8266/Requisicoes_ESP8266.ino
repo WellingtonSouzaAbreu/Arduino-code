@@ -28,7 +28,7 @@ void loop() {
 
   HTTPClient http;
 
-  http.begin("192.168.2.183", 8001, "/esp8266");
+  http.begin("http://192.168.2.251:80/on");
   int httpCodeGet = http.GET();
 
   if (httpCodeGet) {
@@ -39,37 +39,39 @@ void loop() {
       String payload = http.getString();
       Serial.print("Payload: ");
       Serial.println(payload);
+    }else{
+      Serial.println("Erro ao gettar");
     }
   } else {
     Serial.print("[HTTP] GET... failed, no connection or no HTTP server\n");
   }
 
-  http.end();
+  
   Serial.println("-----------------");
-
+  http.end();
   delay(1000);
 
-  http.begin("http://192.168.2.183:8001/esp8266");
-  http.addHeader("Content-Type", "application/json");
-  http.addHeader("Connection", "close");
+  http.begin("http://192.168.2.251:80/off");
+  httpCodeGet = http.GET();
 
-  int httpCodePost = http.POST("{\"hello\":\"world!\"}");
+  if (httpCodeGet) {
+    Serial.printf("[HTTP] GET... code: ", httpCodeGet);
 
-  if (httpCodePost > 0) {
-    Serial.printf("[HTTP] POST... code: ", httpCodePost);
-  }
-
-  if (httpCodePost > 0) {
-    if (httpCodePost == HTTP_CODE_OK) {
-      const String payload = http.getString();
-      Serial.print("received payload: ");
+    // file found at server
+    if (httpCodeGet == 200) {
+      String payload = http.getString();
+      Serial.print("Payload: ");
       Serial.println(payload);
+    }else{
+      Serial.println("Erro ao gettar");
     }
   } else {
-    Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCodePost).c_str());
+    Serial.print("[HTTP] GET... failed, no connection or no HTTP server\n");
   }
 
+  
   Serial.println("-----------------");
-
   http.end();
+  delay(1000);
+
 }

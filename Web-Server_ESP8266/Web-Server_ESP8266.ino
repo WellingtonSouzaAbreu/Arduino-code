@@ -44,9 +44,9 @@ void setup(void) {
     delay(500);
     Serial.print(".");
   }
-  
+
   digitalWrite(LED_BUILTIN, HIGH);
-  
+
   Serial.println("");
   Serial.print("Connected to ");
   Serial.println(ssid);
@@ -64,14 +64,14 @@ void setup(void) {
     server.send(200, "text/plain", "Server online");
   });
 
-  server.on("/light-switch", HTTP_GET, [](){
+  server.on("/light-switch", HTTP_GET, []() {
     String htmlPage = "";
     htmlPage += "<!DOCTYPE html>";
     htmlPage += "<head>";
     htmlPage += "    <meta charset=\"UTF-8\">";
     htmlPage += "    <title>Axios com arduino</title>";
     htmlPage += "    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.0/axios.js\"></script>";
-    
+
     htmlPage += "    <script>";
     htmlPage +=          "function toggleSwitch(stateOfSwitch){";
     htmlPage += "        let state = new FormData();";
@@ -83,14 +83,14 @@ void setup(void) {
     htmlPage += "    }; ";
 
     htmlPage += " function setStateOfSwitchLabel(state){";
-        htmlPage += " let stateLabel = document.querySelector('#state');";
-        htmlPage += " stateLabel.innerHTML = state == 'on' ? 'Ligado': 'Desligado';";
-        htmlPage += " state == 'on' ? stateLabel.style.color = 'green': stateLabel.style.color = 'red';"; 
+    htmlPage += " let stateLabel = document.querySelector('#state');";
+    htmlPage += " stateLabel.innerHTML = state == 'on' ? 'Ligado': 'Desligado';";
+    htmlPage += " state == 'on' ? stateLabel.style.color = 'green': stateLabel.style.color = 'red';";
     htmlPage += " };";
 
-    
+
     htmlPage += "    </script>";
-    
+
     htmlPage += "</head>";
     htmlPage += "<body style=\"display: flex; justify-content: center; align-items: center;flex-direction: column;\">";
     htmlPage += "    <div>";
@@ -100,19 +100,19 @@ void setup(void) {
     htmlPage += "        <button onclick=\"toggleSwitch('on')\" style=\"background-color: green;color: white; padding: 1px 7px;\">Ligar</button>";
     htmlPage += "        <button onclick=\"toggleSwitch('off')\" style=\"background-color: red;color: white; padding: 1px 7px;\">Desligar</button>";
     htmlPage += "    </div>";
-    
+
     htmlPage += "</body>";
     htmlPage += "</html>";
-    
+
     server.send(200, "text/html", htmlPage);
   });
 
   server.on("/light-switch", HTTP_POST, []() {
     String state = server.arg("state");
-    delay(100); 
-    
+    delay(100);
+
     Serial.println(state);
-    
+
     server.send(200, "text/plain", state);
   });
 

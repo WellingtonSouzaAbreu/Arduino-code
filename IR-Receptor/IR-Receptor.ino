@@ -1,52 +1,54 @@
 /*
- * IRremote: IRreceiveDemo - demonstrates receiving IR codes with IRrecv
- * An IR detector/demodulator must be connected to the input RECV_PIN.
- * Initially coded 2009 Ken Shirriff http://www.righto.com/
- */
+   IRremote: IRreceiveDemo - demonstrates receiving IR codes with IRrecv
+   An IR detector/demodulator must be connected to the input RECV_PIN.
+   Initially coded 2009 Ken Shirriff http://www.righto.com/
+*/
 
 #include <IRremote.h>
 
-#if defined(ESP32)
-int IR_RECEIVE_PIN = 15;
-#elif defined(ARDUINO_AVR_PROMICRO)
-int IR_RECEIVE_PIN = 10;
-#else
 int IR_RECEIVE_PIN = 11;
-#endif
 IRrecv IrReceiver(IR_RECEIVE_PIN);
-
-// On the Zero and others we switch explicitly to SerialUSB
-#if defined(ARDUINO_ARCH_SAMD)
-#define Serial SerialUSB
-#endif
+decode_results results;
 
 void setup() {
-    pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
 
-    Serial.begin(115200);
-#if defined(__AVR_ATmega32U4__) || defined(SERIAL_USB) || defined(SERIAL_PORT_USBVIRTUAL)
-    delay(2000); // To be able to connect Serial monitor after reset and before first printout
-#endif
-    // Just to know which program is running on my Arduino
-    Serial.println(F("START " __FILE__ " from " __DATE__));
+  Serial.begin(115200);
 
-    // In case the interrupt driver crashes on setup, give a clue
-    // to the user what's going on.
-    Serial.println("Enabling IRin");
-    IrReceiver.enableIRIn();  // Start the receiver
-    IrReceiver.blink13(true); // Enable feedback LED
+  Serial.println("Enabling IRin");
+  IrReceiver.enableIRIn();  // Start the receiver
+  IrReceiver.blink13(true); // Enable feedback LED
 
-    Serial.print(F("Ready to receive IR signals at pin "));
-    Serial.println(IR_RECEIVE_PIN);
+  Serial.print(F("Ready to receive IR signals at pin "));
+  Serial.println(IR_RECEIVE_PIN);
+  
+  
 }
 
 void loop() {
-    if (IrReceiver.decode()) {
-        IrReceiver.printResultShort(&Serial);
-        Serial.println();
+  if (IrReceiver.decode(&results)) {
 
-        IrReceiver.resume(); // Receive the next value
-        delay(1000);
+    Serial.println(results.decode_type);
+
+
+    if (results.decode_type == NEC) {
+      Serial.print("NEC: ");
+    } else if (results.decode_type == SONY) {
+      Serial.print("SONY: ");
+    } else if (results.decode_type == RC5) {
+      Serial.print("RC5: ");
+    } else if (results.decode_type == RC6) {
+      Serial.print("RC6: ");
+    } else if (results.decode_type == UNKNOWN) {
+      Serial.print("UNKNOWN: ");
     }
-    delay(100);
+    Serial.print(results.value, HEX);
+    Serial.print(" ");
+    Serial.print(" size: ");
+    Serial.println(results.bits);
+    
+    IrReceiver.resume(); // Receive the next value
+
+  }
+  delay(100);
 }

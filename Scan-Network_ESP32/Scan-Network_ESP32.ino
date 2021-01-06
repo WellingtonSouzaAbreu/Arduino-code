@@ -61,10 +61,4 @@ void loop() {
   Serial.println("-----------------------------------------------");
   delay(5000);
 
-
-  /* Serial.write(27);       // Comando ESC
-    Serial.print("[2J");    // comando para limpar a tela
-    Serial.write(27);      // Comando ESC
-    Serial.print("[H");     // cursor Home (início da tela) */
-
 }
