@@ -2,9 +2,20 @@
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+#include <HTTPClient.h>
 
 const char* ssid = "Dumb";
 const char* password = "pipocadoce";
+
+const int rele = 27;
+int capacitiveSensor = 26;
+
+int maxSensorValue = 0;
+int minSensorValue = 5000;
+int minValue = 0;
+int maxValue = 4095;
+int averageScale = 4095;
+float moisture = 0;
 
 WebServer server(80);
 
@@ -25,7 +36,8 @@ void handleNotFound() {
 
 void setup(void) {
 
-  pinMode(27, OUTPUT);
+  pinMode(rele, OUTPUT);
+  pinMode(capacitiveSensor, INPUT);
 
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
@@ -48,26 +60,54 @@ void setup(void) {
     Serial.println("MDNS responder started");
   }
 
-  server.on("/", []() {
-    server.send(200, "text/plain", "Aoba, salve salve! Aqui é o esp32!");
+  server.on("/esp32/rele", HTTP_POST, []() {
+    String state = server.arg("plain");
+
+    if (state == "ON") {
+      digitalWrite(rele, HIGH);
+    } else {
+      if (state == "OFF") {
+        digitalWrite(rele, LOW);
+      }
+    }
+
+    server.send(200, "text/plain", state);
   });
 
-  server.on("/on", HTTP_GET, []() {
-    digitalWrite(27, HIGH);
-    server.send(200, "text/plain", "Led ligado!");
-  });
+  server.on("/esp32/moisture", HTTP_GET, []() {
 
-  server.on("/off", HTTP_GET, []() {
-    digitalWrite(27, LOW);
-    server.send(200, "text/plain", "Led desligado!");
+    Serial.print("/esp/moisture");
+    //String moistureJson = "{\"moisture\": \" "  + String(moisture, 0) + " \"}";
+    server.send(200, "text/plain", "molhado");
   });
 
   server.onNotFound(handleNotFound);
 
   server.begin();
   Serial.println("HTTP server started");
+
+}
+
+void readCapacitiveSensor() {
+  int sensorValue = analogRead(26);
+
+  Serial.print("Valor: ");
+  Serial.println(sensorValue);
+
+  float moisturePercentage = 100 -  ((sensorValue - minValue) * 100 / averageScale);
+
+  Serial.print("Umidade: ");
+  Serial.print(moisturePercentage);
+  Serial.println("%");
+
+  moisture = moisturePercentage;
+
+  delay(1000);
 }
 
 void loop(void) {
   server.handleClient();
+  //  readCapacitiveSensor();
+
+
 }

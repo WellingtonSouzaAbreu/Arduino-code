@@ -50,12 +50,6 @@ void setup(void) {
     Serial.println("MDNS responder started");
   }
 
-  server.on("/", []() {
-    server.send(200, "text/plain", "Aoba, salve salve! Aqui é o esp32!");
-  });
-
-
-
   server.on("/led-esp32", HTTP_POST,  []() {
     String reqData = server.arg("plain");
 
@@ -68,16 +62,6 @@ void setup(void) {
 
     digitalWrite(27, ledStatus == "ON" ? HIGH : LOW);
     server.send(200, "text/plain", "Sucesso! -> " + ledStatus);
-  });
-
-  server.on("/on", HTTP_GET, []() {
-    digitalWrite(27, HIGH);
-    server.send(200, "text/plain", "Led ligado!");
-  });
-
-  server.on("/off", HTTP_GET, []() {
-    digitalWrite(27, LOW);
-    server.send(200, "text/plain", "Led desligado!");
   });
 
   server.onNotFound(handleNotFound);
